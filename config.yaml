@@ -1,0 +1,18 @@
+# Sources documentaires
+documents_dir: data
+
+# Modèle utilisé pour créer les embeddings
+embedding_model: BAAI/bge-small-en-v1.5
+
+# Serveur compatible OpenAI (LM Studio)
+llm_base_url: http://127.0.0.1:1234/v1
+llm_api_key: lm-studio
+llm_model: mistral-7b
+llm_temperature: 0.0
+
+# Découpage des documents
+chunk_size: 500
+chunk_overlap: 100
+
+# Nombre de passages transmis au LLM
+retrieval_k: 3
