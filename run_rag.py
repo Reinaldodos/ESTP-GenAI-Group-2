@@ -1,10 +1,15 @@
 """Interface en ligne de commande du pipeline RAG."""
 
+from pathlib import Path
+
 from rag_pipeline import RAGConfig, RAGPipeline
 
 
+CONFIG_PATH = Path(__file__).with_name("config.yaml")
+
+
 def main() -> None:
-    pipeline = RAGPipeline(RAGConfig())
+    pipeline = RAGPipeline(RAGConfig.from_yaml(CONFIG_PATH))
     print(f"Pipeline prêt ({pipeline.chunk_count} passages indexés).")
 
     while True:

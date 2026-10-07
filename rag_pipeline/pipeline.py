@@ -17,8 +17,8 @@ class RAGResponse:
 class RAGPipeline:
     """Pipeline prêt à répondre après chargement et indexation des documents."""
 
-    def __init__(self, config: RAGConfig | None = None) -> None:
-        self.config = config or RAGConfig()
+    def __init__(self, config: RAGConfig) -> None:
+        self.config = config
         documents = load_documents(self.config.documents_dir)
         chunks = chunk_documents(
             documents,
@@ -39,6 +39,10 @@ class RAGPipeline:
     def ask(self, question: str, k: int | None = None) -> RAGResponse:
         results = self.retrieve(question, k)
         answer = generate_answer(
-            self.client, self.config.llm_model, question, results
+            self.client,
+            self.config.llm_model,
+            self.config.llm_temperature,
+            question,
+            results,
         )
         return RAGResponse(answer=answer, sources=results)

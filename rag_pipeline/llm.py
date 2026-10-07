@@ -37,12 +37,16 @@ Question:
 
 
 def generate_answer(
-    client: OpenAI, model: str, question: str, results: list[SearchResult]
+    client: OpenAI,
+    model: str,
+    temperature: float,
+    question: str,
+    results: list[SearchResult],
 ) -> str:
     """Envoie au LLM la question enrichie par les résultats de recherche."""
     response = client.chat.completions.create(
         model=model,
         messages=[{"role": "user", "content": build_prompt(question, results)}],
-        temperature=0,
+        temperature=temperature,
     )
     return response.choices[0].message.content or ""
