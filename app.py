@@ -64,6 +64,45 @@ st.caption(
     "RAG demo using BGE embeddings, FAISS, and Qwen3-8B"
 )
 
+# =========================================================
+# Sidebar II
+# =========================================================
+
+with st.sidebar:
+
+    st.header("RAG Settings")
+
+    chunk_size_selected = st.slider(
+        "Chunk size",
+        min_value=100,
+        max_value=2000,
+        value=chunk_size,
+        step=100,
+    )
+
+    chunk_overlap_selected = st.slider(
+        "Chunk overlap",
+        min_value=0,
+        max_value=chunk_size_selected,
+        value=min(chunk_overlap, chunk_size_selected),
+        step=50,
+    )
+    
+    top_k_selected = st.slider(
+        "Number of chunks to retrieve",
+        min_value=1,
+        max_value=10,
+        value=top_k,
+    )
+
+    temperature_selected = st.slider(
+        "Temperature",
+        min_value=0.0,
+        max_value=1.0,
+        value=float(llm_temperature),
+        step=0.1,
+    )
+
 
 # =========================================================
 # Initialize RAG
@@ -87,8 +126,8 @@ def initialize_rag():
 
     chunks = create_chunks(
         documents,
-        chunk_size=chunk_size,
-        overlap=chunk_overlap,
+        chunk_size=chunk_size_selected,
+        overlap=chunk_overlap_selected,
     )
 
     # -----------------------------------------------------
@@ -135,31 +174,21 @@ rag = initialize_rag()
 
 
 # =========================================================
-# Sidebar
+# Sidebar II
 # =========================================================
 
 with st.sidebar:
+    st.divider()
 
-    st.header("RAG Settings")
-
-    top_k_selected = st.slider(
-        "Number of chunks to retrieve",
-        min_value=1,
-        max_value=10,
-        value=top_k,
+    st.write(
+        f"**Embedding:** "
+        f"`{embedding_model_name}`"
     )
 
-    st.divider()
-
-    st.subheader("Documents")
-
-    for document in rag["documents"]:
-
-        st.write(
-            f"📄 {document['source']}"
-        )
-
-    st.divider()
+    st.write(
+        f"**LLM:** "
+        f"`{llm_model_name}`"
+    )
 
     st.write(
         f"**Documents:** "
@@ -171,25 +200,15 @@ with st.sidebar:
         f"{len(rag['chunks'])}"
     )
 
-    st.write(
-        f"**Embedding:** "
-        f"`{embedding_model_name}`"
-    )
+    st.divider()
+    
+    st.subheader("Documents")
+    
+    for document in rag["documents"]:
 
-    st.write(
-        f"**Chunk size:** "
-        f"`{chunk_size}`"
-    )
-
-    st.write(
-        f"**Chunk overlap:** "
-        f"`{chunk_overlap}`"
-    )
-
-    st.write(
-        f"**LLM:** "
-        f"`{llm_model_name}`"
-    )
+        st.write(
+            f"📄 {document['source']}"
+        )
 
 
 # =========================================================
@@ -236,7 +255,7 @@ if question:
                 results=results,
                 client=rag["llm_client"],
                 model=llm_model_name,
-                temperature=llm_temperature,
+                temperature=temperature_selected,
             )
 
         except Exception as e:
