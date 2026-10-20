@@ -19,9 +19,9 @@ class RAGPipeline:
 
     def __init__(self, config: RAGConfig) -> None:
         self.config = config
-        documents = load_documents(self.config.documents_dir)
+        self.documents = load_documents(self.config.documents_dir)
         chunks = chunk_documents(
-            documents,
+            self.documents,
             chunk_size=self.config.chunk_size,
             overlap=self.config.chunk_overlap,
         )
@@ -32,16 +32,31 @@ class RAGPipeline:
     def chunk_count(self) -> int:
         return len(self.retriever.chunks)
 
+    @property
+    def document_sources(self) -> tuple[str, ...]:
+        """Retourne les noms des documents indexés, dans leur ordre de chargement."""
+        return tuple(document["source"] for document in self.documents)
+
     def retrieve(self, question: str, k: int | None = None) -> list[SearchResult]:
         result_count = self.config.retrieval_k if k is None else k
         return self.retriever.search(question, result_count)
 
-    def ask(self, question: str, k: int | None = None) -> RAGResponse:
+    def ask(
+        self,
+        question: str,
+        k: int | None = None,
+        temperature: float | None = None,
+    ) -> RAGResponse:
+        generation_temperature = (
+            self.config.llm_temperature if temperature is None else float(temperature)
+        )
+        if not 0 <= generation_temperature <= 2:
+            raise ValueError("temperature doit être comprise entre 0 et 2")
         results = self.retrieve(question, k)
         answer = generate_answer(
             self.client,
             self.config.llm_model,
-            self.config.llm_temperature,
+            generation_temperature,
             question,
             results,
         )
