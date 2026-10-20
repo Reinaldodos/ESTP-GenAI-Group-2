@@ -4,7 +4,6 @@ from openai import OpenAI
 
 from .retrieval import SearchResult
 
-
 FALLBACK_ANSWER = "I don't know based on the provided documents."
 
 

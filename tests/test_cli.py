@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+from typing import ClassVar
 
 import pytest
 
@@ -7,7 +8,7 @@ import run_rag
 
 
 class FakeConfigType:
-    loaded_paths: list[Path] = []
+    loaded_paths: ClassVar[list[Path]] = []
 
     @classmethod
     def from_yaml(cls, path: Path) -> object:

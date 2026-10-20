@@ -4,7 +4,6 @@ from pathlib import Path
 
 from rag_pipeline import RAGConfig, RAGPipeline
 
-
 CONFIG_PATH = Path(__file__).with_name("config.yaml")
 
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+from typing import ClassVar
 
 import pytest
 import streamlit as st
@@ -8,15 +9,17 @@ from streamlit.testing.v1 import AppTest
 import rag_pipeline
 from rag_pipeline.config import RAGConfig
 
-
 APP_PATH = Path(__file__).parents[1] / "app.py"
 
 
 class FakePipeline:
-    instances: list["FakePipeline"] = []
+    instances: ClassVar[list["FakePipeline"]] = []
+    fail_initialization = False
     fail_requests = False
 
     def __init__(self, config: RAGConfig) -> None:
+        if self.fail_initialization:
+            raise RuntimeError("Index unavailable")
         self.config = config
         self.chunk_count = 12
         self.document_sources = ("policy.md", "hotels.md")
@@ -49,6 +52,7 @@ class FakePipeline:
 def fake_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:
     st.cache_resource.clear()
     FakePipeline.instances = []
+    FakePipeline.fail_initialization = False
     FakePipeline.fail_requests = False
     monkeypatch.setattr(rag_pipeline, "RAGPipeline", FakePipeline)
 
@@ -63,10 +67,22 @@ def test_app_starts_and_displays_pipeline_metadata() -> None:
     app = start_app()
 
     assert len(FakePipeline.instances) == 1
-    assert any("Mistral" in caption.value or "local LLM" in caption.value for caption in app.caption)
+    assert any(
+        "Mistral" in caption.value or "local LLM" in caption.value
+        for caption in app.caption
+    )
     assert any("Documents:** 2" in markdown.value for markdown in app.markdown)
     assert any("Chunks:** 12" in markdown.value for markdown in app.markdown)
     assert app.info[0].value == "Ask a question to search the travel documents."
+
+
+def test_index_initialization_error_is_displayed() -> None:
+    FakePipeline.fail_initialization = True
+
+    app = AppTest.from_file(str(APP_PATH), default_timeout=10).run()
+
+    assert app.error[0].value == "The RAG index could not be initialized."
+    assert app.exception[0].message == "Index unavailable"
 
 
 def test_cache_rebuilds_only_when_chunk_settings_change() -> None:

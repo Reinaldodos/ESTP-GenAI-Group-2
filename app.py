@@ -7,7 +7,6 @@ import streamlit as st
 
 from rag_pipeline import RAGConfig, RAGPipeline
 
-
 CONFIG_PATH = Path(__file__).with_name("config.yaml")
 
 
@@ -117,10 +116,7 @@ def main() -> None:
     st.write(response.answer)
     st.subheader("Retrieved Documents")
     for position, result in enumerate(response.sources, start=1):
-        label = (
-            f"{position}. {result['source']} — "
-            f"similarity {result['score']:.3f}"
-        )
+        label = f"{position}. {result['source']} — similarity {result['score']:.3f}"
         with st.expander(label):
             st.write(f"**Chunk:** {result['chunk_id']}")
             st.write(result["text"])
