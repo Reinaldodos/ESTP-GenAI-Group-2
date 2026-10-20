@@ -1,16 +1,15 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
 
+from src.chunking import create_chunks
 from src.config import load_config
 from src.document_loader import load_documents
-from src.chunking import create_chunks
 from src.embedding import create_embedding_model, create_embeddings
-from src.retrieval import create_faiss_index, retrieve
 from src.llm import create_llm_client, generate_answer
-
+from src.retrieval import create_faiss_index, retrieve
 
 # =========================================================
 # Environment
@@ -25,9 +24,7 @@ load_dotenv()
 
 config = load_config("config.yaml")
 
-documents_directory = Path(
-    config["documents"]["directory"]
-)
+documents_directory = Path(config["documents"]["directory"])
 
 documents_pattern = config["documents"]["file_pattern"]
 
@@ -60,16 +57,13 @@ st.set_page_config(
 
 st.title("✈️ Travel Policy Assistant")
 
-st.caption(
-    "RAG demo using BGE embeddings, FAISS, and Qwen3-8B"
-)
+st.caption("RAG demo using BGE embeddings, FAISS, and local LLM")
 
 # =========================================================
 # Sidebar II
 # =========================================================
 
 with st.sidebar:
-
     st.header("RAG Settings")
 
     chunk_size_selected = st.slider(
@@ -87,7 +81,7 @@ with st.sidebar:
         value=min(chunk_overlap, chunk_size_selected),
         step=50,
     )
-    
+
     top_k_selected = st.slider(
         "Number of chunks to retrieve",
         min_value=1,
@@ -98,7 +92,7 @@ with st.sidebar:
     temperature_selected = st.slider(
         "Temperature",
         min_value=0.0,
-        max_value=1.0,
+        max_value=2.0,
         value=float(llm_temperature),
         step=0.1,
     )
@@ -107,6 +101,7 @@ with st.sidebar:
 # =========================================================
 # Initialize RAG
 # =========================================================
+
 
 @st.cache_resource
 def initialize_rag():
@@ -134,9 +129,7 @@ def initialize_rag():
     # 3. Load embedding model
     # -----------------------------------------------------
 
-    embedding_model = create_embedding_model(
-        embedding_model_name
-    )
+    embedding_model = create_embedding_model(embedding_model_name)
 
     # -----------------------------------------------------
     # 4. Create document embeddings
@@ -148,9 +141,7 @@ def initialize_rag():
     # 5. Create FAISS index
     # -----------------------------------------------------
 
-    index = create_faiss_index(
-        embeddings
-    )
+    index = create_faiss_index(embeddings)
 
     # -----------------------------------------------------
     # 6. Create LLM client
@@ -180,35 +171,20 @@ rag = initialize_rag()
 with st.sidebar:
     st.divider()
 
-    st.write(
-        f"**Embedding:** "
-        f"`{embedding_model_name}`"
-    )
+    st.write(f"**Embedding:** `{embedding_model_name}`")
 
-    st.write(
-        f"**LLM:** "
-        f"`{llm_model_name}`"
-    )
+    st.write(f"**LLM:** `{llm_model_name}`")
 
-    st.write(
-        f"**Documents:** "
-        f"{len(rag['documents'])}"
-    )
+    st.write(f"**Documents:** {len(rag['documents'])}")
 
-    st.write(
-        f"**Chunks:** "
-        f"{len(rag['chunks'])}"
-    )
+    st.write(f"**Chunks:** {len(rag['chunks'])}")
 
     st.divider()
-    
-    st.subheader("Documents")
-    
-    for document in rag["documents"]:
 
-        st.write(
-            f"📄 {document['source']}"
-        )
+    st.subheader("Documents")
+
+    for document in rag["documents"]:
+        st.write(f"📄 {document['source']}")
 
 
 # =========================================================
@@ -217,10 +193,7 @@ with st.sidebar:
 
 question = st.text_input(
     "Ask a question about business travel",
-    placeholder=(
-        "e.g. Which hotels can I book "
-        "without manager approval?"
-    ),
+    placeholder=("e.g. Which hotels can I book without manager approval?"),
 )
 
 
@@ -229,11 +202,8 @@ question = st.text_input(
 # =========================================================
 
 if question:
-
     with st.spinner("Searching documents..."):
-
         try:
-
             # -------------------------------------------------
             # Retrieve relevant chunks
             # -------------------------------------------------
@@ -259,7 +229,6 @@ if question:
             )
 
         except Exception as e:
-
             st.error(
                 "Something went wrong. "
                 "Make sure LM Studio is running "
@@ -270,7 +239,6 @@ if question:
 
             st.stop()
 
-
     # =====================================================
     # Answer
     # =====================================================
@@ -278,7 +246,6 @@ if question:
     st.subheader("Answer")
 
     st.write(answer)
-
 
     # =====================================================
     # Retrieved documents
@@ -290,21 +257,10 @@ if question:
         results,
         start=1,
     ):
+        with st.expander(f"{i}. {result['source']} — similarity {result['score']:.3f}"):
+            st.write(f"**Chunk:** {result['chunk_id']}")
 
-        with st.expander(
-            f"{i}. {result['source']} "
-            f"— similarity "
-            f"{result['score']:.3f}"
-        ):
-
-            st.write(
-                f"**Chunk:** "
-                f"{result['chunk_id']}"
-            )
-
-            st.write(
-                result["text"]
-            )
+            st.write(result["text"])
 
 
 # =========================================================
@@ -312,15 +268,9 @@ if question:
 # =========================================================
 
 else:
+    st.info("Ask a question to search the travel documents.")
 
-    st.info(
-        "Ask a question to search "
-        "the travel documents."
-    )
-
-    st.subheader(
-        "Try these questions"
-    )
+    st.subheader("Try these questions")
 
     example_questions = [
         "How much can a hotel cost?",
@@ -332,7 +282,4 @@ else:
     ]
 
     for example in example_questions:
-
-        st.markdown(
-            f"- {example}"
-        )
+        st.markdown(f"- {example}")

@@ -1,10 +1,10 @@
 from openai import OpenAI
 
 
-def create_llm_client(base_url, api_key):
+def create_llm_client(base_url=None, api_key=None):
     return OpenAI(
-        base_url=base_url,
-        api_key=api_key,
+        base_url=base_url or "http://127.0.0.1:1234/v1",
+        api_key=api_key or "lm-studio",
     )
 
 
@@ -16,9 +16,7 @@ def generate_answer(
     temperature=0,
 ):
     context = "\n\n".join(
-        f"[Source: {result['source']}]\n"
-        f"{result['text']}"
-        for result in results
+        f"[Source: {result['source']}]\n{result['text']}" for result in results
     )
 
     prompt = f"""

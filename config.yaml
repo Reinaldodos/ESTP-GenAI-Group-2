@@ -13,5 +13,5 @@ retrieval:
   top_k: 3
 
 llm:
-  model: "qwen3-8b"
+  model: "mistral-7b"
   temperature: 0.0
