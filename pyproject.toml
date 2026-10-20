@@ -23,7 +23,7 @@ test = [
     "pre-commit==4.6.2",
     "pytest>=8",
     "pytest-cov>=5",
-    "ruff==0.17.0",
+    "ruff==0.17.1",
     "streamlit>=1.40",
 ]
 
@@ -36,7 +36,7 @@ pythonpath = ["."]
 addopts = "-ra --strict-markers --cov=rag_pipeline --cov=app --cov=run_rag --cov-branch --cov-report=term-missing --cov-report=html --cov-report=xml"
 
 [tool.ruff]
-required-version = "==0.17.0"
+required-version = "==0.17.1"
 target-version = "py310"
 line-length = 88
 
