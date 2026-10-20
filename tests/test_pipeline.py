@@ -59,12 +59,52 @@ def test_pipeline_initialization_orchestrates_dependencies(
     assert pipeline.config is config
     assert pipeline.client is client
     assert pipeline.chunk_count == 1
+    assert pipeline.document_sources == ("doc.md",)
     assert calls == {
         "documents_dir": Path("documents"),
         "chunk": (documents, 400, 50),
         "retriever": (chunks, "embedding-model"),
         "client": ("http://localhost:1234/v1", "key"),
     }
+
+
+def test_ask_accepts_temperature_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[float] = []
+
+    class FakeRetriever:
+        chunks = [{"text": "Text"}]
+
+        def search(self, question: str, k: int) -> list[object]:
+            return []
+
+    def fake_generate_answer(
+        client: object,
+        model: str,
+        temperature: float,
+        question: str,
+        results: object,
+    ) -> str:
+        calls.append(temperature)
+        return "Answer"
+
+    monkeypatch.setattr(pipeline_module, "generate_answer", fake_generate_answer)
+    pipeline = object.__new__(RAGPipeline)
+    pipeline.config = make_config()
+    pipeline.retriever = FakeRetriever()
+    pipeline.client = object()
+
+    pipeline.ask("Question", temperature=1.3)
+
+    assert calls == [1.3]
+
+
+@pytest.mark.parametrize("temperature", [-0.1, 2.1])
+def test_ask_rejects_invalid_temperature(temperature: float) -> None:
+    pipeline = object.__new__(RAGPipeline)
+    pipeline.config = make_config()
+
+    with pytest.raises(ValueError, match="temperature"):
+        pipeline.ask("Question", temperature=temperature)
 
 
 @pytest.mark.parametrize(("requested_k", "expected_k"), [(None, 4), (2, 2), (0, 0)])
