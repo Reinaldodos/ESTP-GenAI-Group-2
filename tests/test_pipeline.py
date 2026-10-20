@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 
@@ -72,7 +73,7 @@ def test_ask_accepts_temperature_override(monkeypatch: pytest.MonkeyPatch) -> No
     calls: list[float] = []
 
     class FakeRetriever:
-        chunks = [{"text": "Text"}]
+        chunks: ClassVar[list[dict[str, str]]] = [{"text": "Text"}]
 
         def search(self, question: str, k: int) -> list[object]:
             return []
@@ -115,7 +116,7 @@ def test_retrieve_uses_config_default_or_explicit_k(
     expected = [{"source": "doc.md", "chunk_id": 0, "text": "Text", "score": 1.0}]
 
     class FakeRetriever:
-        chunks = [{"text": "Text"}]
+        chunks: ClassVar[list[dict[str, str]]] = [{"text": "Text"}]
 
         def search(self, question: str, k: int) -> object:
             calls.append((question, k))
@@ -138,7 +139,7 @@ def test_ask_returns_generated_answer_and_retrieved_sources(
     calls: dict[str, object] = {}
 
     class FakeRetriever:
-        chunks = [{"text": "Text"}]
+        chunks: ClassVar[list[dict[str, str]]] = [{"text": "Text"}]
 
         def search(self, question: str, k: int) -> object:
             calls["search"] = (question, k)

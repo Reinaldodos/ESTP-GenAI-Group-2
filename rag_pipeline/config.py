@@ -50,11 +50,10 @@ class RAGConfig:
             names = ", ".join(sorted(missing_keys))
             raise ValueError(f"Paramètre(s) manquant(s) dans {config_path} : {names}")
 
-        if "documents_dir" in raw_config:
-            documents_dir = Path(raw_config["documents_dir"])
-            if not documents_dir.is_absolute():
-                documents_dir = config_path.parent / documents_dir
-            raw_config["documents_dir"] = documents_dir
+        documents_dir = Path(raw_config["documents_dir"])
+        if not documents_dir.is_absolute():
+            documents_dir = config_path.parent / documents_dir
+        raw_config["documents_dir"] = documents_dir
 
         return cls(**raw_config)
 

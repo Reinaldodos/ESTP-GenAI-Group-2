@@ -3,8 +3,12 @@ from types import SimpleNamespace
 import pytest
 
 import rag_pipeline.llm as llm_module
-from rag_pipeline.llm import FALLBACK_ANSWER, build_prompt, create_client, generate_answer
-
+from rag_pipeline.llm import (
+    FALLBACK_ANSWER,
+    build_prompt,
+    create_client,
+    generate_answer,
+)
 
 RESULTS = [
     {"source": "first.md", "chunk_id": 0, "text": "First", "score": 0.9},
@@ -60,9 +64,7 @@ def test_generate_answer_sends_expected_request(
             message = SimpleNamespace(content=content)
             return SimpleNamespace(choices=[SimpleNamespace(message=message)])
 
-    client = SimpleNamespace(
-        chat=SimpleNamespace(completions=FakeCompletions())
-    )
+    client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
 
     answer = generate_answer(client, "model", 0.25, "Question?", RESULTS)
 

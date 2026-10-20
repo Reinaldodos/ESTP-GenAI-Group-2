@@ -49,10 +49,8 @@ def test_chunk_text(
     ("chunk_size", "overlap"),
     [(0, 0), (-1, 0), (4, -1), (4, 4), (4, 5)],
 )
-def test_chunk_text_rejects_invalid_parameters(
-    chunk_size: int, overlap: int
-) -> None:
-    with pytest.raises(ValueError):
+def test_chunk_text_rejects_invalid_parameters(chunk_size: int, overlap: int) -> None:
+    with pytest.raises(ValueError, match=r"chunk_size|overlap"):
         chunk_text("text", chunk_size=chunk_size, overlap=overlap)
 
 

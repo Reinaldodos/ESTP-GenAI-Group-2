@@ -17,7 +17,9 @@ def load_documents(documents_dir: Path) -> list[Document]:
     """Charge tous les fichiers Markdown d'un répertoire, dans un ordre stable."""
     documents_dir = Path(documents_dir)
     if not documents_dir.is_dir():
-        raise FileNotFoundError(f"Répertoire de documents introuvable : {documents_dir}")
+        raise FileNotFoundError(
+            f"Répertoire de documents introuvable : {documents_dir}"
+        )
 
     documents = [
         Document(source=path.name, text=path.read_text(encoding="utf-8"))

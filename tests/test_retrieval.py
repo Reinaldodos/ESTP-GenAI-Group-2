@@ -6,7 +6,6 @@ import pytest
 import rag_pipeline.retrieval as retrieval_module
 from rag_pipeline.retrieval import VectorRetriever
 
-
 CHUNKS = [
     {"source": "first.md", "chunk_id": 0, "text": "First passage"},
     {"source": "second.md", "chunk_id": 0, "text": "Second passage"},

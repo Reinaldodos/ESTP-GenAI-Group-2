@@ -1,7 +1,5 @@
 """Création de l'index vectoriel et recherche des passages pertinents."""
 
-from typing import TypedDict
-
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -48,5 +46,5 @@ class VectorRetriever:
                 **self.chunks[int(index_number)],
                 score=float(score),
             )
-            for score, index_number in zip(scores[0], indices[0])
+            for score, index_number in zip(scores[0], indices[0], strict=True)
         ]
